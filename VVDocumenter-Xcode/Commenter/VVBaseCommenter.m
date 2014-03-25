@@ -31,11 +31,11 @@
 -(NSString *) startComment
 {
     if ([[VVDocumenterSetting defaultSetting] useHeaderDoc]) {
-        return [NSString stringWithFormat:@"%@/*!\n%@<#Description#>\n", self.indent, self.prefixString];
+        return [NSString stringWithFormat:@"%@/*!\n%@@brief <#Description#>\n", self.indent, self.prefixString];
     } else if ([[VVDocumenterSetting defaultSetting] prefixWithSlashes]) {
-        return [NSString stringWithFormat:@"%@<#Description#>\n", self.prefixString];
+        return [NSString stringWithFormat:@"%@@brief <#Description#>\n", self.prefixString];
     } else {
-        return [NSString stringWithFormat:@"%@/**\n%@<#Description#>\n", self.indent, self.prefixString];
+        return [NSString stringWithFormat:@"%@/**\n%@@brief <#Description#>\n", self.indent, self.prefixString];
     }
 }
 
@@ -45,7 +45,7 @@
         return @"";
 
     // start off with an empty line
-    NSMutableString *result = [NSMutableString stringWithFormat:@"%@", self.emptyLine];
+    NSMutableString *result = [NSMutableString stringWithFormat:@""];
 
     int longestNameLength = [[self.arguments valueForKeyPath:@"@max.name.length"] intValue];
 
@@ -62,14 +62,14 @@
     if (!self.hasReturn) {
         return @"";
     } else {
-        return [NSString stringWithFormat:@"%@%@@return <#return value description#>\n", self.emptyLine, self.prefixString];
+        return [NSString stringWithFormat:@"%@@return <#return value description#>\n", self.prefixString];
     }
 }
 
 -(NSString *) sinceComment
 {
     if ([[VVDocumenterSetting defaultSetting] addSinceToComments]) {
-        return [NSString stringWithFormat:@"%@%@@since <#version number#>\n", self.emptyLine, self.prefixString];
+        return [NSString stringWithFormat:@"%@@since <#version number#>\n", self.prefixString];
     } else {
         return @"";
     }
@@ -80,7 +80,7 @@
     if ([[VVDocumenterSetting defaultSetting] prefixWithSlashes]) {
         return @"";
     } else {
-        return [NSString stringWithFormat:@"%@ */",self.indent];
+        return [NSString stringWithFormat:@"%@*/",self.indent];
     }
 }
 
@@ -114,11 +114,11 @@
 -(NSString *) prefixString
 {
     if ([[VVDocumenterSetting defaultSetting] prefixWithStar]) {
-        return [NSString stringWithFormat:@"%@ *%@", self.indent, self.space];
+        return [NSString stringWithFormat:@"%@*%@", self.indent, self.space];
     } else if ([[VVDocumenterSetting defaultSetting] prefixWithSlashes]) {
         return [NSString stringWithFormat:@"%@///%@", self.indent, self.space];
     } else {
-        return [NSString stringWithFormat:@"%@ ", self.indent];
+        return [NSString stringWithFormat:@"%@", self.indent];
     }
 }
 

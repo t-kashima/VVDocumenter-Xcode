@@ -61,7 +61,7 @@ NSString *const kVVDNoBlankLinesBetweenFields = @"com.onevcat.VVDocumenter.noBla
 -(NSInteger) spaceCount
 {
     NSInteger count = [[NSUserDefaults standardUserDefaults] integerForKey:kVVDSpaceCount];
-    return (count <= 0) ? 2 : count;
+    return (count <= 0) ? 1 : count;
 }
 
 -(void) setSpaceCount:(NSInteger)spaceCount
