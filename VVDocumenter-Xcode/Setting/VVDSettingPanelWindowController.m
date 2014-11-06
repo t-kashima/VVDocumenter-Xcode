@@ -22,13 +22,20 @@
 @property (weak) IBOutlet NSButtonCell *btnPrefixWithStar;
 @property (weak) IBOutlet NSButtonCell *btnPrefixWithSlashes;
 @property (assign) IBOutlet NSButton *btnAddSinceToComment;
+@property (weak) IBOutlet NSButton *btnBriefDescription;
 @property (weak) IBOutlet NSButton *btnUseHeaderDoc;
 @property (weak) IBOutlet NSButton *btnBlankLinesBetweenSections;
+@property (weak) IBOutlet NSButton *btnAlightArgumentComments;
+@property (weak) IBOutlet NSButton *btnUseAuthorInformation;
+@property (weak) IBOutlet NSButton *btnUseDateInformation;
+@property (weak) IBOutlet NSTextField *tfAuthoInformation;
+@property (weak) IBOutlet NSTextField *tfDateInformaitonFormat;
+
 @end
 
 @implementation VVDSettingPanelWindowController
 
-- (id)initWithWindow:(NSWindow *)window
+- (instancetype)initWithWindow:(NSWindow *)window
 {
     self = [super initWithWindow:window];
     if (self) {
@@ -47,9 +54,15 @@
     self.btnUseSpaces.state = (NSCellStateValue)[[VVDocumenterSetting defaultSetting] useSpaces];
 
     self.btnAddSinceToComment.state = (NSCellStateValue)[[VVDocumenterSetting defaultSetting] addSinceToComments];
+    self.btnBriefDescription.state = (NSCellStateValue)[[VVDocumenterSetting defaultSetting] briefDescription];
     self.btnUseHeaderDoc.state = (NSCellStateValue)[[VVDocumenterSetting defaultSetting] useHeaderDoc];
     self.btnBlankLinesBetweenSections.state = (NSCellStateValue)[[VVDocumenterSetting defaultSetting] blankLinesBetweenSections];
-
+    self.btnAlightArgumentComments.state = (NSCellStateValue)[[VVDocumenterSetting defaultSetting] alignArgumentComments];
+    self.btnUseAuthorInformation.state = (NSCellStateValue)[[VVDocumenterSetting defaultSetting] useAuthorInformation];
+    self.tfAuthoInformation.stringValue = [[VVDocumenterSetting defaultSetting] authorInformation];
+    self.btnUseDateInformation.state = (NSCellStateValue)[[VVDocumenterSetting defaultSetting] useDateInformation];
+    self.tfDateInformaitonFormat.stringValue = [[VVDocumenterSetting defaultSetting] dateInformationFormat];
+    
     if ([[VVDocumenterSetting defaultSetting] prefixWithStar]) {
         [self.mtxPrefixOptions selectCell:self.btnPrefixWithStar];
     } else if ([[VVDocumenterSetting defaultSetting] prefixWithSlashes]) {
@@ -67,6 +80,8 @@
     [self syncSpaceCount];
 
     self.tfTrigger.delegate = self;
+    self.tfDateInformaitonFormat.delegate = self;
+    self.tfAuthoInformation.delegate = self;
 }
 
 - (IBAction)stepperPressed:(id)sender {
@@ -81,19 +96,31 @@
     [[VVDocumenterSetting defaultSetting] setPrefixWithStar:YES];
     [[VVDocumenterSetting defaultSetting] setPrefixWithSlashes:NO];
     [[VVDocumenterSetting defaultSetting] setAddSinceToComments:NO];
+    [[VVDocumenterSetting defaultSetting] setBriefDescription:NO];
     [[VVDocumenterSetting defaultSetting] setUseHeaderDoc:NO];
     [[VVDocumenterSetting defaultSetting] setBlankLinesBetweenSections:YES];
-
+    [[VVDocumenterSetting defaultSetting] setAlignArgumentComments:YES];
+    [[VVDocumenterSetting defaultSetting] setUseAuthorInformation:NO];
+    [[VVDocumenterSetting defaultSetting] setAuthorInformation:VVDDefaultAuthorString];
+    [[VVDocumenterSetting defaultSetting] setUseDateInformation:NO];
+    [[VVDocumenterSetting defaultSetting] setDateInformationFormat:VVDDefaultDateInfomationFormat];
+    
     self.btnUseSpaces.state = NSOnState;
     [self updateUseSpace:self.btnUseSpaces.state];
     self.btnPrefixWithWhitespace.state = NSOffState;
     self.btnPrefixWithStar.state = NSOnState;
     self.btnPrefixWithSlashes.state = NSOffState;
     self.btnAddSinceToComment.state = NSOffState;
+    self.btnBriefDescription.state = NSOffState;
     [self.tfTrigger setStringValue:VVDDefaultTriggerString];
     self.btnUseHeaderDoc.state = NSOffState;
     self.btnBlankLinesBetweenSections.state = NSOnState;
-
+    self.btnAlightArgumentComments.state = NSOnState;
+    self.btnUseAuthorInformation.state = NSOffState;
+    self.tfAuthoInformation.stringValue = VVDDefaultAuthorString;
+    self.btnUseDateInformation.state = NSOffState;
+    self.tfDateInformaitonFormat.stringValue = VVDDefaultDateInfomationFormat;
+    
     self.btnPrefixWithSlashes.enabled = YES;
 
     [self syncSpaceCount];
@@ -116,6 +143,18 @@
     [[VVDocumenterSetting defaultSetting] setAddSinceToComments:self.btnAddSinceToComment.state];
 }
 
+- (IBAction)btnBriefDescriptionPressed:(id)sender {
+    [[VVDocumenterSetting defaultSetting] setBriefDescription:self.btnBriefDescription.state];
+}
+
+- (IBAction)btnUseAuthorInformationPressed:(id)sender {
+    [[VVDocumenterSetting defaultSetting] setUseAuthorInformation:self.btnUseAuthorInformation.state];
+}
+
+- (IBAction)btnUseDateInformationPressed:(id)sender {
+    [[VVDocumenterSetting defaultSetting] setUseDateInformation:self.btnUseDateInformation.state];
+}
+
 -(void) syncSpaceCount
 {
     NSInteger spaceCount = [[VVDocumenterSetting defaultSetting] spaceCount];
@@ -135,6 +174,12 @@
     if([notification object] == self.tfTrigger) {
         [[VVDocumenterSetting defaultSetting] setTriggerString:self.tfTrigger.stringValue];
     }
+    if([notification object] == self.tfAuthoInformation) {
+        [[VVDocumenterSetting defaultSetting] setAuthorInformation:self.tfAuthoInformation.stringValue];
+    }
+    if([notification object] == self.tfDateInformaitonFormat) {
+        [[VVDocumenterSetting defaultSetting] setDateInformationFormat:self.tfDateInformaitonFormat.stringValue];
+    }
 }
 
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor
@@ -146,6 +191,7 @@
     }
     return YES;
 }
+
 - (IBAction)useHeaderDoc:(id)sender {
     [[VVDocumenterSetting defaultSetting] setUseHeaderDoc:self.btnUseHeaderDoc.state];
 
@@ -166,4 +212,9 @@
 - (IBAction)blankLinesBetweenSections:(id)sender {
     [[VVDocumenterSetting defaultSetting] setBlankLinesBetweenSections:self.btnBlankLinesBetweenSections.state];
 }
+
+- (IBAction)alignArgumentComments:(id)sender {
+    [[VVDocumenterSetting defaultSetting] setAlignArgumentComments:self.btnAlightArgumentComments.state];
+}
+
 @end

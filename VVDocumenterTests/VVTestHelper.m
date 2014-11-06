@@ -30,7 +30,8 @@ static NSArray *_typeStrings;
 {
     NSArray *methods = @[@"+ (ADTransition *)nullTransition;",
                          @"   -    (BOOL) application: (UIApplication *) application  \n didFinishLaunchingWithOptions: (NSDictionary *) launchOptions;",
-                         @"- (id)initWithDuration:(CFTimeInterval)duration sourceRect:(CGRect)sourceRect {"];
+                         @"- (id)initWithDuration:(CFTimeInterval)duration sourceRect:(CGRect)sourceRect {",
+                         @"-(void)whenLinked:(void (^)(void))actionHandler;"];
     
     NSArray *functions = @[@"void dosomething ( int x, int  y );",
                            @"int main(int argc, char *argv[]) \n {",
@@ -65,15 +66,36 @@ static NSArray *_typeStrings;
                                  @"@interface SyntaxTests()\n@property (nonatomic, retain) NSArray* inputs;",
                                  @"@implementation SyntaxTests\n\n- (void)setUp\n{",
                                  @"@interface A (a)\n- (id) foo;"];
+
+    NSArray *swiftFunctions = @[@"func sayHello(personName: String) -> String  {",
+                                @"func halfOpenRangeLength(start: Int, end: Int) -> Int\n  {",
+                                @"func sayHelloWorld() ->String"];
     
-    return @[methods,functions,properties,macros,structs,enums,unions,others,compileKeywords];
+    /*
+    //Now there is no difference between Objective-C (C) struct and Swift struct. Ignore this.
+    NSArray *swiftStructs = @[@"struct FixedLengthRange {",
+                              @"public struct SomeStructure \n {",
+                              @"public struct SomeStructure \n {",];
+    */
+    
+    NSArray *swiftEnum = @[@"enum CompassPoint {",
+                           @"enum SomeEnumeration \n {",
+                           @"enum Planet {   "];
+    
+    NSArray *swiftProperties = @[@"let gearing : Gearing",
+                                 @"var size = Size()",
+                                 @"lazy var importer = DataImporter()",
+                                 @"private ( set ) var distanceTravelled:Double"];
+    
+    return @[methods,functions,properties,macros,structs,enums,unions,others,compileKeywords,swiftFunctions,swiftEnum,swiftProperties];
 }
 
 +(NSArray *) uniformCodes
 {
     NSArray *methods = @[@"+(ADTransition *)nullTransition;",
                          @"   -(BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions;",
-                         @"-(id)initWithDuration:(CFTimeInterval)duration sourceRect:(CGRect)sourceRect {"];
+                         @"-(id)initWithDuration:(CFTimeInterval)duration sourceRect:(CGRect)sourceRect {",
+                         @"-(void)whenLinked:(void(^)(void))actionHandler;"];
     
     NSArray *functions = @[@"void dosomething( int x, int  y );",
                            @"int main(int argc, char *argv[]){",
@@ -86,7 +108,7 @@ static NSArray *_typeStrings;
 
     NSArray *macros = @[@"#define MAX(A,B)({",
                         @"#define MIN(A,B)((A)<(B)?(A):(B))",
-                        @"#define ABS(A)((A)< 0 ?(-(A)) :(A))"];
+                        @"#define ABS(A)((A)< 0 ?(-(A)):(A))"];
 
     NSArray *structs = @[@"struct Foo {",
                          @"   struct node {",
@@ -109,7 +131,28 @@ static NSArray *_typeStrings;
                                  @"@implementation SyntaxTests -(void)setUp {",
                                  @"@interface A(a)-(id)foo;"];
     
-    return @[methods,functions,properties,macros,structs,enums,unions,others,compileKeywords];
+    NSArray *swiftFunctions = @[@"func sayHello(personName: String)-> String  {",
+                                @"func halfOpenRangeLength(start: Int, end: Int)-> Int {",
+                                @"func sayHelloWorld()->String",
+                                @"init(style: Style, gearing: Gearing, handlebar: Handlebar, frameSize centimeters: Int) {"];
+    
+    /*
+     //Now there is no difference between Objective-C (C) struct and Swift struct. Ignore this.
+     NSArray *swiftStructs = @[@"struct FixedLengthRange {",
+     @"public struct SomeStructure \n {",
+     @"public struct SomeStructure \n {",];
+     */
+    
+    NSArray *swiftEnum = @[@"enum CompassPoint {",
+                           @"enum SomeEnumeration {",
+                           @"enum Planet {   "];
+    
+    NSArray *swiftProperties = @[@"let gearing : Gearing",
+                                 @"var size = Size()",
+                                 @"lazy var importer = DataImporter()",
+                                 @"private( set )var distanceTravelled:Double"];
+    
+    return @[methods,functions,properties,macros,structs,enums,unions,others,compileKeywords,swiftFunctions,swiftEnum,swiftProperties];
 }
 
 +(NSArray *) arrayOfExceptCodeType:(NSString *)type
@@ -123,7 +166,10 @@ static NSArray *_typeStrings;
                          @"vv_isStruct",
                          @"vv_isEnum",
                          @"vv_isUnion",
-                         @"vv_isComplieKeyword"];
+                         @"vv_isComplieKeyword",
+                         @"vv_isSwiftFunction",
+                         @"vv_isSwiftEnum",
+                         @"vv_isSwiftProperty"];
     }
     
     return [_typeStrings arrayByRemovingObject:type];

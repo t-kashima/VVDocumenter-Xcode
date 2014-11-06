@@ -13,23 +13,64 @@
 
 @interface VVBaseCommenter()
 @property (nonatomic, copy) NSString *space;
+@property (nonatomic, assign) BOOL forSwift;
+@property (nonatomic, assign) BOOL forSwiftEnum;
 @end
 
 @implementation VVBaseCommenter
--(id) initWithIndentString:(NSString *)indent codeString:(NSString *)code
+-(instancetype) initWithIndentString:(NSString *)indent codeString:(NSString *)code
 {
     self = [super init];
     if (self) {
-        self.indent = indent;
-        self.code = code;
-        self.arguments = [NSMutableArray array];
-        self.space = [[VVDocumenterSetting defaultSetting] spacesString];
+        _indent = indent;
+        _code = code;
+        _arguments = [NSMutableArray array];
+        _space = [[VVDocumenterSetting defaultSetting] spacesString];
+        _forSwift = NO;
+        _forSwiftEnum = NO;
     }
     return self;
 }
 
+-(NSString *) paramSymbol {
+    return self.forSwift ? @":param:" : @"@param";
+}
+
+-(NSString *) returnSymbol {
+    return self.forSwift ? @":returns:" : @"@return";
+}
+
 -(NSString *) startComment
 {
+    NSString *descriptionTag =
+    [[VVDocumenterSetting defaultSetting] briefDescription] && !self.forSwift ? @"@brief  " : @"";
+
+    NSString *authorInfo = @"";
+
+    if ([[VVDocumenterSetting defaultSetting] useAuthorInformation] && !self.forSwift) {
+        NSMutableString *authorCotent = @"".mutableCopy;
+        
+        if ([[VVDocumenterSetting defaultSetting] authorInformation].length > 0) {
+            [authorCotent appendString:[[VVDocumenterSetting defaultSetting] authorInformation]];
+        }
+
+        if ([[VVDocumenterSetting defaultSetting] useDateInformation]) {
+            NSString *formatString = [[VVDocumenterSetting defaultSetting] dateInformationFormat];
+            if ([formatString length] <= 0) {
+                formatString = @"MM-dd-YYYY HH:MM:ss";
+            }
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:formatString];
+            
+            if (authorCotent.length > 0) {
+                [authorCotent appendString:@", "];
+            }
+            [authorCotent appendString:[formatter stringFromDate:[NSDate date]]];            
+        }
+
+        authorInfo = [NSString stringWithFormat:@"%@@author %@\n%@\n", self.prefixString, authorCotent, self.prefixString];
+    }
+    
     if ([[VVDocumenterSetting defaultSetting] useHeaderDoc]) {
         return [NSString stringWithFormat:@"%@/*!\n%@@brief <#Description#>\n", self.indent, self.prefixString];
     } else if ([[VVDocumenterSetting defaultSetting] prefixWithSlashes]) {
@@ -50,9 +91,22 @@
     int longestNameLength = [[self.arguments valueForKeyPath:@"@max.name.length"] intValue];
 
     for (VVArgument *arg in self.arguments) {
-        NSString *paddedName = [arg.name stringByPaddingToLength:longestNameLength withString:@" " startingAtIndex:0];
+        NSString *name = arg.name;
 
-        [result appendFormat:@"%@@param %@ <#%@ description#>\n", self.prefixString, paddedName, arg.name];
+        if ([[VVDocumenterSetting defaultSetting] alignArgumentComments]) {
+            if (self.forSwiftEnum) {
+                name = [[name stringByAppendingString:@":"] stringByPaddingToLength:longestNameLength + 1 withString:@" " startingAtIndex:0];
+            } else {
+                name = [name stringByPaddingToLength:longestNameLength withString:@" " startingAtIndex:0];
+            }
+        }
+
+        if (self.forSwiftEnum) {
+            [result appendFormat:@"%@- %@ <#%@ description#>\n", self.prefixString, name, arg.name];
+        } else {
+            [result appendFormat:@"%@%@ %@ <#%@ description#>\n", self.prefixString, [self paramSymbol], name, arg.name];
+        }
+
     }
     return result;
 }
@@ -84,7 +138,26 @@
     }
 }
 
--(NSString *) document
+-(NSString *) documentForSwift
+{
+    self.forSwift = YES;
+    return [self __document];
+}
+
+-(NSString *) documentForSwiftEnum
+{
+    self.forSwiftEnum = YES;
+    self.forSwift = YES;
+    return [self __document];
+}
+
+-(NSString *) documentForC
+{
+    self.forSwift = NO;
+    return [self __document];
+}
+
+-(NSString *) __document
 {
     NSString * comment = [NSString stringWithFormat:@"%@%@%@%@%@",
                           [self startComment],
@@ -92,7 +165,7 @@
                           [self returnComment],
                           [self sinceComment],
                           [self endComment]];
-
+    
     // The last line of the comment should be adjacent to the next line of code,
     // back off the newline from the last comment component.
     if ([[VVDocumenterSetting defaultSetting] prefixWithSlashes]) {
@@ -100,6 +173,12 @@
     } else {
         return comment;
     }
+}
+
+-(NSString *) document
+{
+    //This is the default action
+    return [self documentForC];
 }
 
 -(NSString *) emptyLine
@@ -133,6 +212,8 @@
     for (__strong NSString *argumentString in argumentStrings) {
         VVArgument *arg = [[VVArgument alloc] init];
         argumentString = [argumentString vv_stringByReplacingRegexPattern:@"=\\s*\\w*" withString:@""];
+        argumentString = [argumentString vv_stringByReplacingRegexPattern:@"\\(" withString:@" "];
+        argumentString = [argumentString vv_stringByReplacingRegexPattern:@"\\*" withString:@" "];
         argumentString = [argumentString vv_stringByReplacingRegexPattern:@"\\s+$" withString:@""];
         argumentString = [argumentString vv_stringByReplacingRegexPattern:@"\\s+" withString:@" "];
         NSMutableArray *tempArgs = [[argumentString componentsSeparatedByString:@" "] mutableCopy];
@@ -150,6 +231,11 @@
 
         [self.arguments addObject:arg];
     }
+}
+
+-(BOOL) shouldComment
+{
+    return YES;
 }
 
 @end
