@@ -429,6 +429,21 @@ SIAlertViewBackgroundStyleSolid,
 	</array>
 	<key>vv_isSwiftFunction</key>
 	<array>
+        <dict>
+            <key>source</key>
+            <string>func testParasType(var a: Int, let b: Int, inout c: Int, d: Int) {</string>
+            <key>uniform</key>
+            <string>func testParasType(var a: Int, let b: Int, inout c: Int, d: Int){</string>
+            <key>result</key>
+            <string>/**
+ &lt;#Description#&gt;
+
+ :param: a &lt;#a description#&gt;
+ :param: b &lt;#b description#&gt;
+ :param: c &lt;#c description#&gt;
+ :param: d &lt;#d description#&gt;
+ */</string>
+        </dict>
 		<dict>
 			<key>source</key>
 			<string>func sayHello(personName: String) -&gt; String  {</string>
@@ -533,6 +548,20 @@ SIAlertViewBackgroundStyleSolid,
  :returns: &lt;#return value description#&gt;
  */</string>
 		</dict>
+        <dict>
+            <key>source</key>
+            <string>public subscript (key: KeyType) -> ValueType? {</string>
+            <key>uniform</key>
+            <string>public subscript(key: KeyType)-> ValueType? {</string>
+            <key>result</key>
+            <string>/**
+ &lt;#Description#&gt;
+
+ :param: key &lt;#key description#&gt;
+
+ :returns: &lt;#return value description#&gt;
+ */</string>
+        </dict>
 	</array>
 	<key>vv_isSwiftEnum</key>
 	<array>
